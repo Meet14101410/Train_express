@@ -1,0 +1,45 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+my $schedule_file = 'express_schedule.txt';
+open my $fh, '<', $schedule_file or die "Cannot open '$schedule_file': $!";
+
+my %routes;
+
+# Read and parse the schedule file
+while (my $line = <$fh>) {
+    chomp $line;
+    next if $line =~ /^#/; # Skip comments
+
+    # Expected format: From|To|TravelTime(min)
+    my ($from, $to, $time) = split /\|/, $line;
+    $routes{$from}{$to} = $time;
+    $routes{$to}{$from} = $time; # Assuming bidirectional routes
+}
+close $fh;
+
+sub get_travel_time {
+    my ($start, $end) = @_;
+    if (exists $routes{$start}{$end}) {
+        return $routes{$start}{$end};
+    } else {
+        return undef;
+    }
+}
+
+my ($start_station, $end_station) = ("City Hub", "Airport Terminal");
+my $time = get_travel_time($start_station, $end_station);
+
+if (defined $time) {
+    print "Travel time from $start_station to $end_station: $time minutes.\n";
+} else {
+    print "No direct route found between $start_station and $end_station.\n";
+}
+
+__END__
+# Data for express_schedule.txt
+# From|To|TravelTime(min)
+City Hub|Metro Center|25
+Metro Center|Airport Terminal|40
+City Hub|Financial District|15
