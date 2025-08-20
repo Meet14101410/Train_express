@@ -1,0 +1,57 @@
+# Represents an express train station
+class ExpressStation
+  attr_reader :name, :routes
+
+  def initialize(name)
+    @name = name
+    @routes = {} # Using a hash for quick lookups
+  end
+
+  def add_route(destination_station, travel_time_minutes)
+    @routes[destination_station.name] = travel_time_minutes
+  end
+end
+
+# Manages the express train network
+class ExpressNetwork
+  def initialize
+    @stations = {}
+  end
+
+  def add_station(name)
+    @stations[name] = ExpressStation.new(name)
+  end
+
+  def add_express_route(from_name, to_name, travel_time)
+    if @stations[from_name] && @stations[to_name]
+      @stations[from_name].add_route(@stations[to_name], travel_time)
+      @stations[to_name].add_route(@stations[from_name], travel_time) # Bidirectional
+    end
+  end
+
+  def get_travel_time(start_name, end_name)
+    return nil unless @stations[start_name]
+    @stations[start_name].routes[end_name]
+  end
+end
+
+network = ExpressNetwork.new
+
+network.add_station("City Hub")
+network.add_station("Metro Center")
+network.add_station("Airport Terminal")
+network.add_station("Financial District")
+
+network.add_express_route("City Hub", "Metro Center", 25)
+network.add_express_route("Metro Center", "Airport Terminal", 40)
+network.add_express_route("City Hub", "Financial District", 15)
+
+start_station = "City Hub"
+end_station = "Airport Terminal"
+travel_time = network.get_travel_time(start_station, end_station)
+
+if travel_time
+  puts "Express travel time from #{start_station} to #{end_station}: #{travel_time} minutes."
+else
+  puts "No direct express route found."
+end
